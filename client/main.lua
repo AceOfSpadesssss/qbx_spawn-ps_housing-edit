@@ -211,14 +211,31 @@ local function inputHandler()
                 Wait(0)
             end
 
-            TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
-            TriggerEvent('QBCore:Client:OnPlayerLoaded')
             FreezeEntityPosition(cache.ped, false)
 
             local coords = spawns[currentButtonID].coords
 
             SetEntityCoords(cache.ped, coords.x, coords.y, coords.z, false, false, false, false)
             SetEntityHeading(cache.ped, coords.w or 0.0)
+
+            if spawns[currentButtonID].first_time then
+                TriggerServerEvent("ps-housing:server:createNewApartment", spawns[currentButtonID].key)
+            elseif spawns[currentButtonID].coords == lib.callback.await('qbx_spawn:server:getLastLocation') then -- last location
+                local insideMeta = QBX.PlayerData.metadata["inside"]
+                if insideMeta.property_id ~= nil then
+                    local property_id = insideMeta.property_id
+                    TriggerServerEvent('ps-housing:server:enterProperty', tostring(property_id))
+                end
+            elseif spawns[currentButtonID].id then -- appartment
+                local property_id = spawns[currentButtonID].id
+                TriggerServerEvent('ps-housing:server:enterProperty', tostring(property_id))
+            else -- Not an appartment
+                TriggerServerEvent('ps-housing:server:resetMetaData')
+            end
+
+            TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
+            TriggerEvent('QBCore:Client:OnPlayerLoaded')
+            
             DoScreenFadeIn(1000)
             break
         end
@@ -228,21 +245,32 @@ local function inputHandler()
     stopCamera()
 end
 
-AddEventHandler('qb-spawn:client:setupSpawns', function()
+AddEventHandler('qb-spawn:client:setupSpawns', function(cData, new, apps)
     spawns = {}
+    if new then
+        for k, v in pairs(apps) do 
+            spawns[#spawns+1] = {
+                first_time = true,
+                key = k,
+                label = v.label,
+                coords = vector3(v.door.x, v.door.y, v.door.z)
+            }
+        end
+    else
+        spawns[#spawns+1] = {
+            label = 'last_location',
+            coords = lib.callback.await('qbx_spawn:server:getLastLocation')
+        }
 
-    spawns[#spawns+1] = {
-        label = 'last_location',
-        coords = lib.callback.await('qbx_spawn:server:getLastLocation')
-    }
+        for i = 1, #config.spawns do
+            spawns[#spawns+1] = config.spawns[i]
+        end
 
-    for i = 1, #config.spawns do
-        spawns[#spawns+1] = config.spawns[i]
-    end
-
-    local houses = lib.callback.await('qbx_spawn:server:getHouses')
-    for i = 1, #houses do
-        spawns[#spawns+1] = houses[i]
+        local houses = lib.callback.await('qbx_spawn:server:getHouses')
+        for i = 1, #houses do
+            spawns[#spawns+1] = houses[i]
+            print(houses[i].label)
+        end
     end
 
     Wait(400)

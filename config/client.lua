@@ -1,6 +1,6 @@
 return {
     spawns = {
-        {
+        --[[ {
             label = 'Legion Square',
             coords = vec4(195.17, -933.77, 29.7, 144.5)
         },
@@ -11,6 +11,6 @@ return {
         {
             label = 'Motels',
             coords = vec4(327.56, -205.08, 53.08, 163.5),
-        },
+        }, ]]
     }
 }
