@@ -11,6 +11,5 @@ local ps_starters = {
     -- ["Name of Starting appartment"] = vector3(0, 0, 0)
     ["Motel"] = vector3(325.14, -229.54, 54.21)
 }
-
 ```
 ^^ This was needed for the coords of all the starting appartments to show correctly on the map since ps-housing gets their coords from the config and not database!
