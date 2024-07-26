@@ -205,14 +205,20 @@ local function inputHandler()
 
             updateScaleform()
         elseif IsControlJustReleased(0, 191) then
-            DoScreenFadeOut(1000)
+            if not config.clouds then
+                DoScreenFadeOut(1000)
 
-            while not IsScreenFadedOut() do
-                Wait(0)
+                while not IsScreenFadedOut() do
+                    Wait(0)
+                end
+            else
+                SwitchOutPlayer(PlayerPedId(), 0, 1)
+                Citizen.Wait(250)
+                stopCamera()
             end
 
             FreezeEntityPosition(cache.ped, false)
-
+            
             local coords = spawns[currentButtonID].coords
 
             SetEntityCoords(cache.ped, coords.x, coords.y, coords.z, false, false, false, false)
@@ -235,14 +241,26 @@ local function inputHandler()
 
             TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
             TriggerEvent('QBCore:Client:OnPlayerLoaded')
-            
-            DoScreenFadeIn(1000)
+        
+            if config.clouds then 
+                Citizen.Wait(5000)
+                SwitchInPlayer(PlayerPedId())
+                if not spawns[currentButtonID].first_time then
+                    lib.requestAnimDict("random@peyote@generic", 15000)
+                    Citizen.Wait(1500)
+                    TaskPlayAnim(cache.ped, "random@peyote@generic", "wakeup", 8.0, 8.0, -1, 0, 0, false, false, false)
+                end
+            else
+                DoScreenFadeIn(1000)
+            end
             break
         end
 
         Wait(0)
     end
-    stopCamera()
+    if not config.clouds then
+        stopCamera()
+    end
 end
 
 AddEventHandler('qb-spawn:client:setupSpawns', function(cData, new, apps)
@@ -269,7 +287,7 @@ AddEventHandler('qb-spawn:client:setupSpawns', function(cData, new, apps)
         local houses = lib.callback.await('qbx_spawn:server:getHouses')
         for i = 1, #houses do
             spawns[#spawns+1] = houses[i]
-            print(houses[i].label)
+            --print(houses[i].label)
         end
     end
 

@@ -12,5 +12,6 @@ return {
             label = 'Motels',
             coords = vec4(327.56, -205.08, 53.08, 163.5),
         }, ]]
-    }
+    },
+    clouds = true -- Enable the clouds load in with wake up animation
 }

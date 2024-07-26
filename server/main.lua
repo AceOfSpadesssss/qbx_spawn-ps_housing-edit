@@ -1,6 +1,6 @@
 local ps_starters = {
-    -- ["Name of Starting appartment"]
-    ["Motellet"] = vector3(325.14, -229.54, 54.21)
+    -- ["Name of Starting appartment"] = vector3()
+    ["Motel"] = vector3(325.14, -229.54, 54.21)
 }
 
 lib.callback.register('qbx_spawn:server:getLastLocation', function(source)
